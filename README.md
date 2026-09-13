@@ -2,7 +2,7 @@
 
 
 
-# [Project Name] 🎯
+# [Keyboard Rage Detector] 🎯
 
 
 ## Basic Details
@@ -10,18 +10,28 @@
 
 
 ### Team Members
-- Team Lead: [Name] - [College]
-- Member 2: [Name] - [College]
-- Member 3: [Name] - [College]
+- Team Lead: [Amrithendu J R] - [SOE CUSAT]
+  
 
 ### Project Description
-[2-3 lines about what your project does]
+[Keyboard rage detector is a software project that monitors keyboard activity detects unusual or aggressive typing patterns. It analyses factors such as rapid key presses, repeated key presses, and excessive backspace or space usage to estimate the user's frustration or rage level. When the detected activity crosses a predefined threshold, the application displays a warning and a visual indication with sound. The project can run in the background while the user works, studies, codes or play games.]
 
 ### The Problem (that doesn't exist)
-[What ridiculous problem are you solving?]
+[People sometimes become frustrated while studying, programing, gaming or typing. During these moments they may repeatedly hit keys, press keys fast or aggressively use backspace. There is no simple system that humorously detects these keyboard patterns and tell the user.]
 
 ### The Solution (that nobody asked for)
-[How are you solving it? Keep it fun!]
+[I created a keyboard rage detector that continuously observes the keyboard activity and create a Rage Score.
+The system can detect patterns such as:
+. Extremely fast key presses
+. Many keys pressed within a short period
+. Repeating pressing of the same key
+. Excessive space/enter presses
+. Excessive backspace presses
+
+And the application displays a funny warning according to your rage score.
+Example: 
+     Rage level: 80%
+     "Angry Gorilla Mode"]
 
 ## Technical Details
 ### Technologies/Components Used
@@ -32,9 +42,7 @@ For Software:
 - [Tools used]
 
 For Hardware:
-- [List main components]
-- [List specifications]
-- [List tools required]
+- [No additional hardware is required]
 
 ### Implementation
 For Software:
@@ -90,8 +98,6 @@ For Hardware:
 
 ## Team Contributions
 - [Name 1]: [Specific contributions]
-- [Name 2]: [Specific contributions]
-- [Name 3]: [Specific contributions]
 
 ---
 Made with ❤️ at TinkerHub Useless Projects 
