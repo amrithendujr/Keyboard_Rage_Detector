@@ -65,8 +65,7 @@ For Software:
 
 ## Team Contributions
 - Team Lead: Designed and documented the project vision, including the README and project structure.
-- Member 2: Implemented the web UI, styling, visual layering, and screenshot-ready interface behavior.
-- Member 3: Built the rage scoring logic, comments, and reusable project files for live detection.
+  
 
 ---
 Made with ❤️ at TinkerHub Useless Projects
