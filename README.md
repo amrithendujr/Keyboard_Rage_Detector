@@ -39,7 +39,10 @@ For Software:
 - [Python]
 - [pynput - keyboard event mnitoring]
 - [pySide6 / PyQt6 - graphical user interface]
-- []
+- [time - timing keyboard events]
+- [collections - storing recent keyboard events]
+- [threading - running keyboard monitoring without freezing the GUI]
+- [statistics / mathematics - calculating rage score]
 
 For Hardware:
 - [No additional hardware is required]
