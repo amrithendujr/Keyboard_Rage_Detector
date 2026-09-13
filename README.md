@@ -6,9 +6,7 @@
 ### Team Name: Keyboard Rage Detector
 
 ### Team Members
-- Team Lead: Keyboard Rage Detector Project - Web & Detection
-- Member 2: Frontend UI & Styling - HTML, CSS, JavaScript
-- Member 3: Scoring Engine & Audio Logic - JavaScript / Python
+- Team Lead: Amrithendu J R
 
 ### Project Description
 Keyboard Rage Detector is a real-time typing hostility analyzer that measures how aggressively you hit your keyboard. It calculates a live Rage Score from 0 to 100%, visualizes your typing fury with gauges and screen effects, and responds with witty commentary and reactive sounds.
