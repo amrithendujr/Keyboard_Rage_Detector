@@ -36,10 +36,10 @@ Example:
 ## Technical Details
 ### Technologies/Components Used
 For Software:
-- [Languages used]
-- [Frameworks used]
-- [Libraries used]
-- [Tools used]
+- [Python]
+- [pynput - keyboard event mnitoring]
+- [pySide6 / PyQt6 - graphical user interface]
+- []
 
 For Hardware:
 - [No additional hardware is required]
