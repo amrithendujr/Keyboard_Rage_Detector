@@ -1,1 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keyboard Rage Detector - Real-Time Hostility Analytics</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container" id="appContainer">
+        <!-- Top Navigation / Header -->
+        <header class="app-header">
+            <div class="logo-group">
+                <div class="logo-icon">⚡</div>
+                <div class="logo-text">
+                    <h1>Keyboard Rage Detector</h1>
+                    <p>Real-Time Keystroke Hostility & Frustration Meter</p>
+                </div>
+            </div>
+            <div class="header-controls">
+                <button class="btn-icon" id="soundBtn" title="Toggle sound effects">
+                    <span id="soundIcon">🔊</span> <span id="soundLabel">Sound On</span>
+                </button>
+                <button class="btn-icon" id="resetBtn" title="Reset all telemetry">
+                    🔄 Reset
+                </button>
+            </div>
+        </header>
 
+        <!-- Main Rage Gauge Display -->
+        <main class="gauge-card" id="gaugeCard">
+            <div class="gauge-wrapper">
+                <svg class="gauge-svg" viewBox="0 0 260 160">
+                    <!-- Semi-circle Track -->
+                    <path class="gauge-track" d="M 30,140 A 100,100 0 0,1 230,140" />
+                    <!-- Dynamic Progress Bar -->
+                    <path class="gauge-progress" id="gaugeProgress" d="M 30,140 A 100,100 0 0,1 230,140" />
+                </svg>
+                <div class="gauge-center-content">
+                    <div class="gauge-number" id="rageValue">0</div>
+                    <div class="gauge-unit">RAGE %</div>
+                </div>
+            </div>
+
+            <!-- Tier Classification Badge -->
+            <div class="tier-badge" id="tierBadge">🌿 ZEN MONK</div>
+
+            <!-- Reactive Commentary Banner -->
+            <div class="comment-box" id="commentBox">
+                <div class="comment-quote-icon">“</div>
+                <div class="comment-text" id="commentText">
+                    Start typing below to analyze your keyboard hostility...
+                </div>
+            </div>
+        </main>
+
+        <!-- Live Telemetry Stats Grid -->
+        <section class="telemetry-grid">
+            <div class="stat-card">
+                <div class="stat-label">🏎️💨 Zoomies Speed</div>
+                <div class="stat-value" id="statCps">0.0 <span class="stat-sub">CPS</span></div>
+                <div class="stat-sub" id="statWpm">~0 WPM</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">⏪🤦‍♂️ Regret Meter</div>
+                <div class="stat-value" id="statBackspace">0%</div>
+                <div class="stat-sub">Backspace hostility</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">🥊🦍 Gorilla Slam</div>
+                <div class="stat-value" id="statMash">0</div>
+                <div class="stat-sub">Home-row fist factor</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">📢🦖 Screech Ratio</div>
+                <div class="stat-value" id="statCaps">0%</div>
+                <div class="stat-sub">Caps & rage punctuation</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">🏆💀 Peak Tilt</div>
+                <div class="stat-value" id="statPeak">0%</div>
+                <div class="stat-sub">Highest meltdown</div>
+            </div>
+        </section>
+
+        <!-- Interactive Typing Arena -->
+        <section class="arena-card" id="arenaCard" style="position: relative;">
+            <div class="arena-header">
+                <div class="arena-title">
+                    <span>⌨️</span> Typing Arena (Type gently or smash with a brick)
+                </div>
+                <div class="scenarios">
+                    <button class="btn-scenario" data-prompt="Dear Team, Per my last email which you clearly didn't read, the deadline was YESTERDAY! Why is this so hard?! 💀">
+                        📧 "Per My Last Email" 💀
+                    </button>
+                    <button class="btn-scenario" data-prompt="I have spent 4 HOURS debugging why div centering is broken! IT WAS A MISSING CLOSING CURLY BRACE! AAAAAAA! 😭">
+                        🐛 "CSS Centering Hell" 😭
+                    </button>
+                    <button class="btn-scenario" data-prompt="Why is the office printer showing 'PC LOAD LETTER' again?! WHAT DOES THAT EVEN MEAN?!?! 🪓">
+                        🖨️ "PC LOAD LETTER" 🪓
+                    </button>
+                    <button class="btn-scenario" data-prompt="NOOO! 999 PING IN THE FINAL PROMO MATCH?! MY ROUTER IS SLEEPING WITH THE FISHES! 🤬🎮">
+                        🎮 "Ranked Match Lag" 🤬
+                    </button>
+                    <button class="btn-scenario" data-prompt="ASDFGHJKL;QWERTYUIOPZXCVBNM AAAAAAA WHY DOES NOTHING WORK?!?! 🦍💥">
+                        🦍 "Forehead Smash" 💥
+                    </button>
+                </div>
+            </div>
+
+            <textarea 
+                id="typeArea" 
+                class="typing-input" 
+                placeholder="Type here to test... Try rapid spamming (aaaaaaa), aggressive backspacing, shouting in CAPS, or gentle rhythmic sentences..."
+                spellcheck="false"
+                autocomplete="off"
+            ></textarea>
+
+            <div class="arena-footer">
+                <div class="sensitivity-group">
+                    <label for="sensitivityRange">Sensitivity:</label>
+                    <input type="range" id="sensitivityRange" class="range-slider" min="0.5" max="2.0" step="0.1" value="1.0">
+                    <span id="sensitivityVal">1.0x</span>
+                </div>
+                <button class="btn-clear" id="clearTextBtn">Clear Text Area</button>
+            </div>
+        </section>
+
+        <!-- Subtle Footer -->
+        <footer class="app-footer">
+            Built with <span>❤</span> for keyboards that suffer daily abuse. Zero external dependencies.
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="comments.js"></script>
+    <script src="audio.js"></script>
+    <script src="engine.js"></script>
+    <script>
+        // DOM Elements
+        const appContainer = document.getElementById('appContainer');
+        const gaugeProgress = document.getElementById('gaugeProgress');
+        const rageValue = document.getElementById('rageValue');
+        const tierBadge = document.getElementById('tierBadge');
+        const commentText = document.getElementById('commentText');
+        const commentBox = document.getElementById('commentBox');
+        const typeArea = document.getElementById('typeArea');
+
+        const statCps = document.getElementById('statCps');
+        const statWpm = document.getElementById('statWpm');
+        const statBackspace = document.getElementById('statBackspace');
+        const statMash = document.getElementById('statMash');
+        const statCaps = document.getElementById('statCaps');
+        const statPeak = document.getElementById('statPeak');
+
+        const soundBtn = document.getElementById('soundBtn');
+        const soundIcon = document.getElementById('soundIcon');
+        const soundLabel = document.getElementById('soundLabel');
+        const resetBtn = document.getElementById('resetBtn');
+        const clearTextBtn = document.getElementById('clearTextBtn');
+        const sensitivityRange = document.getElementById('sensitivityRange');
+        const sensitivityVal = document.getElementById('sensitivityVal');
+        const scenarioBtns = document.querySelectorAll('.btn-scenario');
+
+        // Semi-circle circumference for R=100 is Math.PI * 100 ≈ 314.16
+        const GAUGE_CIRCUMFERENCE = Math.PI * 100;
+        gaugeProgress.style.strokeDasharray = GAUGE_CIRCUMFERENCE;
+        gaugeProgress.style.strokeDashoffset = GAUGE_CIRCUMFERENCE;
+
+        let isSoundEnabled = true;
+
+        // Sound Toggle
+        soundBtn.addEventListener('click', () => {
+            isSoundEnabled = !isSoundEnabled;
+            window.rageAudio.setMuted(!isSoundEnabled);
+            soundIcon.textContent = isSoundEnabled ? '🔊' : '🔇';
+            soundLabel.textContent = isSoundEnabled ? 'Sound On' : 'Muted';
+        });
+
+        // Sensitivity Control
+        sensitivityRange.addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value);
+            sensitivityVal.textContent = val.toFixed(1) + 'x';
+            window.rageEngine.setSensitivity(val);
+        });
+
+        // Reset
+        resetBtn.addEventListener('click', () => {
+            window.rageEngine.reset();
+            typeArea.value = '';
+            typeArea.focus();
+        });
+
+        clearTextBtn.addEventListener('click', () => {
+            typeArea.value = '';
+            typeArea.focus();
+        });
+
+        // Prompt Scenarios
+        let scenarioInterval = null;
+        scenarioBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const prompt = btn.getAttribute('data-prompt');
+                typeArea.value = '';
+                typeArea.focus();
+
+                if (scenarioInterval) clearInterval(scenarioInterval);
+                let idx = 0;
+                // Animate typing the scenario rapidly
+                scenarioInterval = setInterval(() => {
+                    if (idx < prompt.length) {
+                        const char = prompt[idx];
+                        typeArea.value += char;
+                        typeArea.scrollTop = typeArea.scrollHeight;
+                        window.rageEngine.handleKeyDown({ key: char, code: 'Key' + char.toUpperCase() });
+                        window.rageAudio.playKeyClick(window.rageEngine.currentRage);
+                        window.rageEngine.handleKeyUp({ key: char, code: 'Key' + char.toUpperCase() });
+                        idx++;
+                    } else {
+                        clearInterval(scenarioInterval);
+                        scenarioInterval = null;
+                    }
+                }, 40); // Fast angry 25 CPS simulation
+            });
+        });
+
+        // Floating Emoji Spawner
+        const arenaCard = document.getElementById('arenaCard');
+        const RAGE_EMOJIS = ['🔥', '💀', '💥', '💢', '🚨', '🤬', '🦖', '🦍', '🪓', '🚑', '🧂', '🥺', '🤡'];
+
+        function spawnEmojiBurst(rage) {
+            if (rage < 35 && Math.random() > 0.1) return;
+            const emojiEl = document.createElement('div');
+            emojiEl.className = 'emoji-particle';
+            emojiEl.textContent = RAGE_EMOJIS[Math.floor(Math.random() * RAGE_EMOJIS.length)];
+
+            // Random positioning around textarea
+            const rect = typeArea.getBoundingClientRect();
+            const arenaRect = arenaCard.getBoundingClientRect();
+            const posX = Math.random() * (rect.width - 60) + 30;
+            const posY = Math.random() * (rect.height - 40) + 40;
+
+            emojiEl.style.left = posX + 'px';
+            emojiEl.style.top = posY + 'px';
+            emojiEl.style.setProperty('--rand-x', `${(Math.random() - 0.5) * 80}px`);
+            emojiEl.style.setProperty('--rand-rot', `${(Math.random() - 0.5) * 60}deg`);
+
+            arenaCard.appendChild(emojiEl);
+            setTimeout(() => emojiEl.remove(), 850);
+        }
+
+        // Event Listeners for Typing
+        typeArea.addEventListener('keydown', (e) => {
+            window.rageEngine.handleKeyDown(e);
+            window.rageAudio.playKeyClick(window.rageEngine.currentRage);
+            spawnEmojiBurst(window.rageEngine.currentRage);
+        });
+
+        typeArea.addEventListener('keyup', (e) => {
+            window.rageEngine.handleKeyUp(e);
+        });
+
+        // Global key capture toggle (works even if user is typing on page)
+        window.addEventListener('keydown', (e) => {
+            if (document.activeElement !== typeArea && !['Tab', 'F5', 'F12'].includes(e.key)) {
+                typeArea.focus();
+            }
+        });
+
+        // Engine Update Subscription
+        let lastComment = "";
+        window.rageEngine.onUpdate((state) => {
+            const rage = state.rage;
+            const metrics = state.metrics;
+
+            // 1. Update Gauge
+            rageValue.textContent = rage;
+            const offset = GAUGE_CIRCUMFERENCE - (rage / 100) * GAUGE_CIRCUMFERENCE;
+            gaugeProgress.style.strokeDashoffset = offset;
+
+            // 2. Dynamic Color & Glow Theme
+            document.documentElement.style.setProperty('--rage-color', state.color);
+            const rgbMatch = state.color.match(/\w\w/g);
+            if (rgbMatch) {
+                const [r, g, b] = rgbMatch.map(x => parseInt(x, 16));
+                document.documentElement.style.setProperty('--rage-glow', `rgba(${r}, ${g}, ${b}, 0.35)`);
+            }
+
+            // 3. Update Badge & Comments
+            tierBadge.textContent = state.badge;
+            tierBadge.style.color = state.color;
+            tierBadge.style.borderColor = state.color;
+
+            if (state.comment !== lastComment) {
+                lastComment = state.comment;
+                commentText.style.opacity = '0';
+                setTimeout(() => {
+                    commentText.textContent = state.comment;
+                    commentText.style.opacity = '1';
+                }, 150);
+            }
+
+            // 4. Screen Shake & Visual Feedback
+            appContainer.classList.remove('shake-mild', 'shake-wild', 'shake-cataclysmic');
+            if (rage >= 85) {
+                appContainer.classList.add('shake-cataclysmic');
+            } else if (rage >= 63) {
+                appContainer.classList.add('shake-wild');
+            } else if (rage >= 45) {
+                appContainer.classList.add('shake-mild');
+            }
+
+            // 5. Telemetry Cards
+            statCps.innerHTML = `${metrics.cps} <span class="stat-sub">CPS</span>`;
+            statWpm.textContent = `~${metrics.wpm} WPM`;
+            statBackspace.textContent = `${Math.round(metrics.backspaceRate * 100)}%`;
+            statMash.textContent = metrics.mashIndex;
+            statCaps.textContent = `${Math.round(metrics.capsRatio * 100)}%`;
+            statPeak.textContent = `${state.peakRage}%`;
+        });
+    </script>
+</body>
+</html>

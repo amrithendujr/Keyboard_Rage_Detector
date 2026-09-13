@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keyboard Rage Detector ⚡ (Funny Edition)</title>
+    <style>
+        :root {
+            --bg-base: #0a0d14;
+            --bg-card: rgba(18, 24, 38, 0.85);
+            --bg-card-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --rage-color: #10b981;
+            --rage-glow: rgba(16, 185, 129, 0.4);
+            --font-mono: 'JetBrains Mono', 'Fira Code', monospace, sans-serif;
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-base);
+            background-image: 
+                radial-gradient(circle at 50% 0%, var(--rage-glow) 0%, transparent 60%),
+                radial-gradient(circle at 10% 90%, rgba(20, 30, 50, 0.5) 0%, transparent 40%),
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 32px 32px, 32px 32px;
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 1rem 3rem 1rem;
+            transition: background 0.3s ease;
+            overflow-x: hidden;
+        }
+
+        /* Screen Shake Keyframes */
+        @keyframes shake-mild {
+            0% { transform: translate(0, 0); }
+            25% { transform: translate(-2px, 2px); }
+            50% { transform: translate(2px, -2px); }
+            75% { transform: translate(-1px, -1px); }
+            100% { transform: translate(0, 0); }
+        }
+
+        @keyframes shake-wild {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            20% { transform: translate(-4px, 3px) rotate(-0.5deg); }
+            40% { transform: translate(4px, -3px) rotate(0.5deg); }
+            60% { transform: translate(-3px, -2px) rotate(-0.3deg); }
+            80% { transform: translate(3px, 2px) rotate(0.3deg); }
+            100% { transform: translate(0, 0) rotate(0deg); }
+        }
+
+        @keyframes shake-cataclysmic {
+            0% { transform: translate(0, 0) scale(1); filter: hue-rotate(0deg); }
+            15% { transform: translate(-8px, 6px) scale(1.01) rotate(-1deg); filter: hue-rotate(20deg); }
+            30% { transform: translate(7px, -7px) scale(0.99) rotate(1deg); filter: hue-rotate(-20deg); }
+            45% { transform: translate(-6px, -5px) scale(1.02) rotate(-0.5deg); }
+            60% { transform: translate(8px, 4px) scale(0.98) rotate(0.7deg); }
+            75% { transform: translate(-5px, 7px) scale(1.01); }
+            100% { transform: translate(0, 0) scale(1); filter: hue-rotate(0deg); }
+        }
+
+        .shake-mild { animation: shake-mild 0.18s infinite ease-in-out; }
+        .shake-wild { animation: shake-wild 0.14s infinite ease-in-out; }
+        .shake-cataclysmic { animation: shake-cataclysmic 0.1s infinite linear; }
+
+        /* Floating Emoji Bursts */
+        .emoji-particle {
+            position: absolute;
+            pointer-events: none;
+            font-size: 1.8rem;
+            user-select: none;
+            animation: float-up-fade 0.8s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+            z-index: 100;
+        }
+
+        @keyframes float-up-fade {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) scale(0.6) rotate(0deg);
+            }
+            50% {
+                transform: translate(var(--rand-x, 0px), -45px) scale(1.35) rotate(var(--rand-rot, 15deg));
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--rand-x, 0px), -90px) scale(0.8) rotate(var(--rand-rot, 30deg));
+            }
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 860px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .app-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--bg-card-border);
+        }
+
+        .logo-group { display: flex; align-items: center; gap: 0.8rem; }
+        .logo-icon {
+            font-size: 2.2rem;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.4rem 0.6rem;
+            border-radius: 12px;
+            border: 1px solid var(--bg-card-border);
+        }
+        .logo-text h1 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff 40%, #9ca3af 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .logo-text p { font-size: 0.82rem; color: var(--text-muted); }
+
+        .header-controls { display: flex; align-items: center; gap: 0.75rem; }
+        .btn-icon {
+            background: var(--bg-card);
+            border: 1px solid var(--bg-card-border);
+            color: var(--text-main);
+            padding: 0.5rem 0.8rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-icon:hover { background: rgba(255, 255, 255, 0.1); }
+
+        .gauge-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--bg-card-border);
+            border-radius: 20px;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5), 0 0 35px var(--rage-glow);
+            transition: all 0.3s ease;
+        }
+
+        .gauge-wrapper {
+            position: relative;
+            width: 260px;
+            height: 170px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .gauge-svg { width: 260px; height: 160px; overflow: visible; }
+        .gauge-track {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.08);
+            stroke-width: 14;
+            stroke-linecap: round;
+        }
+        .gauge-progress {
+            fill: none;
+            stroke: var(--rage-color);
+            stroke-width: 14;
+            stroke-linecap: round;
+            stroke-dasharray: 314.16;
+            stroke-dashoffset: 314.16;
+            transition: stroke-dashoffset 0.15s ease-out, stroke 0.3s ease;
+            filter: drop-shadow(0 0 8px var(--rage-color));
+        }
+
+        .gauge-center-content {
+            position: absolute;
+            top: 55px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .gauge-number {
+            font-size: 3.4rem;
+            font-family: var(--font-mono);
+            font-weight: 900;
+            line-height: 1;
+        }
+        .gauge-unit {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-top: 0.2rem;
+        }
+
+        .tier-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.4rem 1.1rem;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--rage-color);
+            color: var(--rage-color);
+            margin-top: 0.5rem;
+            text-transform: uppercase;
+            box-shadow: 0 0 15px var(--rage-glow);
+            transition: all 0.3s ease;
+        }
+
+        .comment-box {
+            margin-top: 1.4rem;
+            background: rgba(0, 0, 0, 0.35);
+            border-left: 4px solid var(--rage-color);
+            border-radius: 0 12px 12px 0;
+            padding: 1rem 1.4rem;
+            width: 100%;
+            min-height: 68px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        .comment-quote-icon {
+            font-size: 1.8rem;
+            opacity: 0.4;
+            color: var(--rage-color);
+            flex-shrink: 0;
+        }
+        .comment-text {
+            font-size: 1.05rem;
+            font-weight: 500;
+            line-height: 1.4;
+            color: #e5e7eb;
+            transition: opacity 0.2s ease;
+        }
+
+        .telemetry-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 0.85rem;
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--bg-card-border);
+            border-radius: 14px;
+            padding: 0.9rem 1.1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        .stat-label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+        .stat-value {
+            font-size: 1.45rem;
+            font-family: var(--font-mono);
+            font-weight: 700;
+        }
+        .stat-sub { font-size: 0.7rem; color: var(--text-muted); }
+
+        .arena-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--bg-card-border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            position: relative;
+        }
+        .arena-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .arena-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+        .scenarios { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
+        .btn-scenario {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--bg-card-border);
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            padding: 0.3rem 0.65rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-scenario:hover { background: rgba(255, 255, 255, 0.12); color: var(--text-main); }
+
+        .typing-input {
+            width: 100%;
+            min-height: 130px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 1rem;
+            color: var(--text-main);
+            font-family: var(--font-mono);
+            font-size: 1.05rem;
+            line-height: 1.5;
+            resize: vertical;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        .typing-input:focus {
+            border-color: var(--rage-color);
+            box-shadow: 0 0 15px var(--rage-glow);
+        }
+        .arena-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        .sensitivity-group { display: flex; align-items: center; gap: 0.6rem; }
+        .range-slider { accent-color: var(--rage-color); cursor: pointer; }
+        .btn-clear {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        .btn-clear:hover { color: #ef4444; }
+    </style>
+</head>
+<body>
+    <div class="app-container" id="appContainer">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo-group">
+                <div class="logo-icon">⚡</div>
+                <div class="logo-text">
+                    <h1>Keyboard Rage Detector</h1>
+                    <p>Real-Time Keystroke Hostility & Frustration Meter</p>
+                </div>
+            </div>
+            <div class="header-controls">
+                <button class="btn-icon" id="soundBtn">
+                    <span id="soundIcon">🔊</span> <span id="soundLabel">Sound On</span>
+                </button>
+                <button class="btn-icon" id="resetBtn">🔄 Reset</button>
+            </div>
+        </header>
+
+        <!-- Rage Gauge Card -->
+        <main class="gauge-card" id="gaugeCard">
+            <div class="gauge-wrapper">
+                <svg class="gauge-svg" viewBox="0 0 260 160">
+                    <path class="gauge-track" d="M 30,140 A 100,100 0 0,1 230,140" />
+                    <path class="gauge-progress" id="gaugeProgress" d="M 30,140 A 100,100 0 0,1 230,140" />
+                </svg>
+                <div class="gauge-center-content">
+                    <div class="gauge-number" id="rageValue">0</div>
+                    <div class="gauge-unit">RAGE %</div>
+                </div>
+            </div>
+
+            <div class="tier-badge" id="tierBadge">🧘‍♂️ CHILLAXED BUDDHA</div>
+
+            <div class="comment-box" id="commentBox">
+                <div class="comment-quote-icon">“</div>
+                <div class="comment-text" id="commentText">
+                    Start typing below to analyze your keyboard aggression...
+                </div>
+            </div>
+        </main>
+
+        <!-- Live Telemetry -->
+        <section class="telemetry-grid">
+            <div class="stat-card">
+                <div class="stat-label">🏎️💨 Zoomies Speed</div>
+                <div class="stat-value" id="statCps">0.0 <span class="stat-sub">CPS</span></div>
+                <div class="stat-sub" id="statWpm">~0 WPM</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">⏪🤦‍♂️ Regret Meter</div>
+                <div class="stat-value" id="statBackspace">0%</div>
+                <div class="stat-sub">Backspace hostility</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">🥊🦍 Gorilla Slam</div>
+                <div class="stat-value" id="statMash">0</div>
+                <div class="stat-sub">Home-row fist factor</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">📢🦖 Screech Ratio</div>
+                <div class="stat-value" id="statCaps">0%</div>
+                <div class="stat-sub">Caps & rage punctuation</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">🏆💀 Peak Tilt</div>
+                <div class="stat-value" id="statPeak">0%</div>
+                <div class="stat-sub">Highest meltdown</div>
+            </div>
+        </section>
+
+        <!-- Interactive Typing Arena -->
+        <section class="arena-card" id="arenaCard">
+            <div class="arena-header">
+                <div class="arena-title">⌨️ Typing Arena (Type gently or smash with a brick)</div>
+                <div class="scenarios">
+                    <button class="btn-scenario" data-prompt="Dear Team, Per my last email which you clearly didn't read, the deadline was YESTERDAY! Why is this so hard?! 💀">
+                        📧 "Per My Last Email" 💀
+                    </button>
+                    <button class="btn-scenario" data-prompt="I have spent 4 HOURS debugging why div centering is broken! IT WAS A MISSING CLOSING CURLY BRACE! AAAAAAA! 😭">
+                        🐛 "CSS Centering Hell" 😭
+                    </button>
+                    <button class="btn-scenario" data-prompt="Why is the office printer showing 'PC LOAD LETTER' again?! WHAT DOES THAT EVEN MEAN?!?! 🪓">
+                        🖨️ "PC LOAD LETTER" 🪓
+                    </button>
+                    <button class="btn-scenario" data-prompt="NOOO! 999 PING IN THE FINAL PROMO MATCH?! MY ROUTER IS SLEEPING WITH THE FISHES! 🤬🎮">
+                        🎮 "Ranked Match Lag" 🤬
+                    </button>
+                    <button class="btn-scenario" data-prompt="ASDFGHJKL;QWERTYUIOPZXCVBNM AAAAAAA WHY DOES NOTHING WORK?!?! 🦍💥">
+                        🦍 "Forehead Smash" 💥
+                    </button>
+                </div>
+            </div>
+
+            <textarea 
+                id="typeArea" 
+                class="typing-input" 
+                placeholder="Type here to test... Try rapid spamming (aaaaaaa), aggressive backspacing, shouting in CAPS, or gentle rhythmic sentences..."
+                spellcheck="false"
+            ></textarea>
+
+            <div class="arena-footer">
+                <div class="sensitivity-group">
+                    <label for="sensitivityRange">Sensitivity:</label>
+                    <input type="range" id="sensitivityRange" class="range-slider" min="0.5" max="2.0" step="0.1" value="1.0">
+                    <span id="sensitivityVal">1.0x</span>
+                </div>
+                <button class="btn-clear" id="clearTextBtn">Clear Text</button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Hilarious Commentary Database
+        const TIERS = {
+            ZEN: { min: 0, max: 18, color: "#10b981", badge: "🧘‍♂️ CHILLAXED BUDDHA", comments: [
+                "Namaste bro 🧘‍♂️ You're typing like you're rubbing essential oils on the keys 🍵",
+                "Zero hostility detected 🌱 Are you typing in a lavender field with flute music? 🪈",
+                "Your keyboard feels safe, loved, and emotionally validated 💖⌨️",
+                "Bro is typing in lowercase whisper mode... shhh don't wake the switches 🤫☁️",
+                "Smooth, dignified, and serene. You definitely drink chamomile tea while reading docs 🍵✨"
+            ]},
+            MILD: { min: 19, max: 38, color: "#3b82f6", badge: "☕ PASSIVE-AGGRESSIVE INTERN", comments: [
+                "We detect a subtle brow furrow 👁️👄👁️ 'Per my previous email' incoming...",
+                "A tiny vein just popped on your forehead 🤏😡 Take a sip of water, bestie 🧃",
+                "Typing briskly. Did someone reply-all with 'Please remove me from this thread'?! 💀✉️",
+                "You just aggressively clicked your mouse wheel didn't you? 🐁👀",
+                "Polite corporate smile on the outside, eye-twitch on the inside 🙃💼"
+            ]},
+            SIMMERING: { min: 39, max: 62, color: "#f59e0b", badge: "🧂 CHIEF SALT OFFICER", comments: [
+                "Warning: That backspace key didn't steal your lunch money, chill! 💀🥪",
+                "Are you coding or playing Street Fighter combos on the home row?! 🕹️🥋",
+                "Bro is cooking minute rice in 54 seconds with that finger friction! 🍚🔥",
+                "You just sighed audibly through your nose like a disappointed dragon 🐉💨",
+                "Your spacebar is whispering 'Please have mercy on me' 🥺⌨️"
+            ]},
+            RAGING: { min: 63, max: 84, color: "#ef4444", badge: "🦍 ANGRY GORILLA MODE", comments: [
+                "WOAH! Keycaps are holding on for dear life! Ease off the throttle! 🪂💥",
+                "Your spacebar just filed an emergency restraining order with HR 📜🚨",
+                "You're typing like the keyboard owes you 50 bucks and child support! 💸🥊",
+                "Neighbors think you're jackhammering the floorboards! 🏗️🔊",
+                "Cherry MX switches are screaming in lowercase 'help us' 😭🍒"
+            ]},
+            DEFCON1: { min: 85, max: 100, color: "#dc2626", badge: "💀 KEYBOARD EXTINCTION EVENT", comments: [
+                "🚨 CODE RED! THE DESK IS SHAKING, THE CAT IS HIDING, CALL 911! 🐈💨🚑",
+                "NUCLEAR MELTDOWN DETECTED! BRO IS TYPING WITH SLEDGEHAMMERS! 🌋🔨",
+                "ARE YOU TYPING WITH A FOREHEAD ROLL?! STEP AWAY FROM THE PLASTIC! 🤦‍♂️💥",
+                "MAXIMUM UNHINGED ANNIHILATION! RIP MECHANICAL SWITCHES 🪦👻",
+                "KEYBOARD REPLACEMENT: $150. ANGER MANAGEMENT: STRONGLY RECOMMENDED 🛋️🧠"
+            ]}
+        };
+
+        const SPECIALS = {
+            backspace: [
+                "BACKSPACE SPEEDRUN ANY% NO GLITCHES! 🏃‍♂️💨 Rewinding life choices!",
+                "Bro just erased an entire novel in 0.3 seconds! Regret level: OVER 9000 💀⏪",
+                "The delete key is begging for ice water and an ambulance! 🚑🧯"
+            ],
+            caps: [
+                "LOUD NOISES! 🗣️📢 WHY ARE WE SCREAMING AT THE CLOUDS?! 🦖⚡",
+                "CAPS LOCK DOESN'T MAKE YOUR CODE RUN, IT JUST MAKES IT SCARY! 👹🔥",
+                "ALL CAPS DETECTED! We can hear your scream through the fiber optic cables! 📡😱"
+            ],
+            mash: [
+                "DID A GOBLIN SMASH ITS HEAD ON YOUR HOME ROW?! 👺💥⌨️",
+                "A wild keyboard smash appeared! 'asdfghjk' is not a real word, bro! 🐾🤯",
+                "Total unbridled mash! You literally just donkey-kong punched your desk! 🦍🍌"
+            ]
+        };
+
+        function getComment(rage, metrics) {
+            if (rage > 35) {
+                if (metrics.capsRatio > 0.65) return SPECIALS.caps[Math.floor(Math.random() * SPECIALS.caps.length)];
+                if (metrics.backspaceRate > 0.4) return SPECIALS.backspace[Math.floor(Math.random() * SPECIALS.backspace.length)];
+                if (metrics.mashIndex > 5) return SPECIALS.mash[Math.floor(Math.random() * SPECIALS.mash.length)];
+            }
+            let tier = TIERS.ZEN;
+            if (rage >= 85) tier = TIERS.DEFCON1;
+            else if (rage >= 63) tier = TIERS.RAGING;
+            else if (rage >= 39) tier = TIERS.SIMMERING;
+            else if (rage >= 19) tier = TIERS.MILD;
+            return tier.comments[Math.floor(Math.random() * tier.comments.length)];
+        }
+
+        function getTierInfo(rage) {
+            if (rage >= 85) return TIERS.DEFCON1;
+            if (rage >= 63) return TIERS.RAGING;
+            if (rage >= 39) return TIERS.SIMMERING;
+            if (rage >= 19) return TIERS.MILD;
+            return TIERS.ZEN;
+        }
+
+        // Web Audio Synthesizer
+        class AudioSynth {
+            constructor() { this.ctx = null; this.muted = false; }
+            init() {
+                if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                if (this.ctx.state === 'suspended') this.ctx.resume();
+            }
+            playClick(rage) {
+                if (this.muted) return;
+                this.init();
+                try {
+                    const now = this.ctx.currentTime;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = rage > 60 ? 'sawtooth' : 'triangle';
+                    osc.frequency.setValueAtTime(300 + (rage * 8), now);
+                    osc.frequency.exponentialRampToValueAtTime(50, now + 0.04);
+                    gain.gain.setValueAtTime(Math.min(0.25, 0.05 + (rage / 100) * 0.2), now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+                    osc.connect(gain); gain.connect(this.ctx.destination);
+                    osc.start(now); osc.stop(now + 0.05);
+                } catch(e) {}
+            }
+        }
+        const audio = new AudioSynth();
+
+        // Engine State
+        let events = [];
+        let currentRage = 0;
+        let targetRage = 0;
+        let peakRage = 0;
+        let sensitivity = 1.0;
+        let lastCommentTime = 0;
+        let activeComment = "Start typing below to analyze your keyboard aggression...";
+        const GAUGE_CIRCUMFERENCE = Math.PI * 100;
+
+        // Elements
+        const appContainer = document.getElementById('appContainer');
+        const arenaCard = document.getElementById('arenaCard');
+        const gaugeProgress = document.getElementById('gaugeProgress');
+        const rageValue = document.getElementById('rageValue');
+        const tierBadge = document.getElementById('tierBadge');
+        const commentText = document.getElementById('commentText');
+        const typeArea = document.getElementById('typeArea');
+        const statCps = document.getElementById('statCps');
+        const statWpm = document.getElementById('statWpm');
+        const statBackspace = document.getElementById('statBackspace');
+        const statMash = document.getElementById('statMash');
+        const statCaps = document.getElementById('statCaps');
+        const statPeak = document.getElementById('statPeak');
+        const soundBtn = document.getElementById('soundBtn');
+        const soundIcon = document.getElementById('soundIcon');
+        const soundLabel = document.getElementById('soundLabel');
+        const sensitivityRange = document.getElementById('sensitivityRange');
+        const sensitivityVal = document.getElementById('sensitivityVal');
+        const clearTextBtn = document.getElementById('clearTextBtn');
+        const resetBtn = document.getElementById('resetBtn');
+
+        soundBtn.addEventListener('click', () => {
+            audio.muted = !audio.muted;
+            soundIcon.textContent = audio.muted ? '🔇' : '🔊';
+            soundLabel.textContent = audio.muted ? 'Muted' : 'Sound On';
+        });
+
+        sensitivityRange.addEventListener('input', (e) => {
+            sensitivity = parseFloat(e.target.value);
+            sensitivityVal.textContent = sensitivity.toFixed(1) + 'x';
+        });
+
+        clearTextBtn.addEventListener('click', () => { typeArea.value = ''; typeArea.focus(); });
+        resetBtn.addEventListener('click', () => {
+            events = []; currentRage = 0; targetRage = 0; peakRage = 0;
+            typeArea.value = ''; typeArea.focus();
+        });
+
+        // Floating Emoji Spawner
+        const RAGE_EMOJIS = ['🔥', '💀', '💥', '💢', '🚨', '🤬', '🦖', '🦍', '🪓', '🚑', '🧂', '🥺', '🤡'];
+        function spawnEmojiBurst(rage) {
+            if (rage < 35 && Math.random() > 0.1) return;
+            const emojiEl = document.createElement('div');
+            emojiEl.className = 'emoji-particle';
+            emojiEl.textContent = RAGE_EMOJIS[Math.floor(Math.random() * RAGE_EMOJIS.length)];
+
+            const rect = typeArea.getBoundingClientRect();
+            const posX = Math.random() * (rect.width - 60) + 30;
+            const posY = Math.random() * (rect.height - 40) + 40;
+
+            emojiEl.style.left = posX + 'px';
+            emojiEl.style.top = posY + 'px';
+            emojiEl.style.setProperty('--rand-x', `${(Math.random() - 0.5) * 80}px`);
+            emojiEl.style.setProperty('--rand-rot', `${(Math.random() - 0.5) * 60}deg`);
+
+            arenaCard.appendChild(emojiEl);
+            setTimeout(() => emojiEl.remove(), 850);
+        }
+
+        // Scenario Typing Simulation
+        let scenarioTimer = null;
+        document.querySelectorAll('.btn-scenario').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const prompt = btn.getAttribute('data-prompt');
+                typeArea.value = ''; typeArea.focus();
+                if (scenarioTimer) clearInterval(scenarioTimer);
+                let idx = 0;
+                scenarioTimer = setInterval(() => {
+                    if (idx < prompt.length) {
+                        const char = prompt[idx];
+                        typeArea.value += char;
+                        typeArea.scrollTop = typeArea.scrollHeight;
+                        registerKey(char);
+                        spawnEmojiBurst(currentRage);
+                        idx++;
+                    } else {
+                        clearInterval(scenarioTimer);
+                    }
+                }, 40);
+            });
+        });
+
+        function registerKey(key) {
+            const now = performance.now();
+            const isBackspace = (key === 'Backspace' || key === 'Delete');
+            const isCaps = !isBackspace && key.length === 1 && key.toUpperCase() === key && key.toLowerCase() !== key;
+            const isAngry = ['!', '?', '#', '$', '%', '@'].includes(key);
+
+            events.push({ time: now, key: key, isBackspace, isCaps: isCaps || isAngry });
+            audio.playClick(currentRage);
+        }
+
+        typeArea.addEventListener('keydown', (e) => {
+            registerKey(e.key);
+            spawnEmojiBurst(currentRage);
+        });
+
+        // Animation Loop
+        let lastTick = performance.now();
+        function loop(now) {
+            const dt = (now - lastTick) / 1000;
+            lastTick = now;
+
+            const cutoff = now - 3000;
+            while (events.length > 0 && events[0].time < cutoff) events.shift();
+
+            const count = events.length;
+            let metrics = { cps: 0, wpm: 0, backspaceRate: 0, capsRatio: 0, mashIndex: 0 };
+
+            if (count > 0) {
+                const span = Math.max(0.4, (now - events[0].time) / 1000);
+                const cps = count / span;
+                const backspaces = events.filter(e => e.isBackspace).length;
+                const backspaceRate = backspaces / count;
+                const capsCount = events.filter(e => e.isCaps).length;
+                const capsRatio = capsCount / count;
+
+                let mash = 0;
+                for (let i = 1; i < count; i++) {
+                    const prev = events[i-1];
+                    const curr = events[i];
+                    if (prev.key === curr.key && (curr.time - prev.time) < 140) mash += 2;
+                    if ((curr.time - prev.time) < 55) mash += 1.5;
+                }
+
+                metrics = {
+                    cps: parseFloat(cps.toFixed(1)),
+                    wpm: Math.round((cps * 60) / 5),
+                    backspaceRate: parseFloat(backspaceRate.toFixed(2)),
+                    capsRatio: parseFloat(capsRatio.toFixed(2)),
+                    mashIndex: Math.round(mash)
+                };
+
+                const vScore = cps > 3.5 ? Math.min(38, Math.pow((cps - 3.5) / 8, 1.3) * 38) : 0;
+                const bScore = Math.min(30, backspaceRate * 35);
+                const mScore = Math.min(32, mash * 3.2);
+                const cScore = Math.min(22, capsRatio * 25);
+
+                targetRage = Math.max(0, Math.min(100, Math.round((vScore + bScore + mScore + cScore) * sensitivity)));
+            } else {
+                targetRage = Math.max(0, targetRage - (35 * dt));
+            }
+
+            const speed = targetRage > currentRage ? 8 : 3.5;
+            currentRage += (targetRage - currentRage) * Math.min(1, speed * dt);
+            const dispRage = Math.round(currentRage);
+
+            if (dispRage > peakRage) peakRage = dispRage;
+
+            if (now - lastCommentTime > 2000 || Math.abs(currentRage - targetRage) > 20) {
+                activeComment = getComment(dispRage, metrics);
+                commentText.textContent = activeComment;
+                lastCommentTime = now;
+            }
+
+            const tier = getTierInfo(dispRage);
+            rageValue.textContent = dispRage;
+            gaugeProgress.style.strokeDashoffset = GAUGE_CIRCUMFERENCE - (dispRage / 100) * GAUGE_CIRCUMFERENCE;
+            document.documentElement.style.setProperty('--rage-color', tier.color);
+
+            tierBadge.textContent = tier.badge;
+            tierBadge.style.color = tier.color;
+            tierBadge.style.borderColor = tier.color;
+
+            appContainer.classList.remove('shake-mild', 'shake-wild', 'shake-cataclysmic');
+            if (dispRage >= 85) appContainer.classList.add('shake-cataclysmic');
+            else if (dispRage >= 63) appContainer.classList.add('shake-wild');
+            else if (dispRage >= 45) appContainer.classList.add('shake-mild');
+
+            statCps.innerHTML = `${metrics.cps} <span class="stat-sub">CPS</span>`;
+            statWpm.textContent = `~${metrics.wpm} WPM`;
+            statBackspace.textContent = `${Math.round(metrics.backspaceRate * 100)}%`;
+            statMash.textContent = metrics.mashIndex;
+            statCaps.textContent = `${Math.round(metrics.capsRatio * 100)}%`;
+            statPeak.textContent = `${peakRage}%`;
+
+            requestAnimationFrame(loop);
+        }
+        requestAnimationFrame(loop);
+    </script>
+</body>
+</html>
